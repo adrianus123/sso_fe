@@ -41,13 +41,16 @@ const Home = () => {
     <div className="container">
       {!useStore((state) => state.authData) ? (
         <>
-          <h1>Unauthorized</h1>
+          <h1>Welcome</h1>
           <button onClick={redirectLogin} className="button">
             Login
           </button>
         </>
       ) : (
-        <User />
+        <>
+          <h1>React x Nestjs Google Sign in</h1>
+          <User />
+        </>
       )}
     </div>
   );
