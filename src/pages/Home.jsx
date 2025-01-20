@@ -5,25 +5,24 @@ import User from "../components/User";
 import { useStore } from "../hooks/useStore";
 
 const Home = () => {
-  const setAuthData = useStore(state => state.setAuthData)
-  const token = Cookies.get("access_token");
+  const setAuthData = useStore((state) => state.setAuthData);
+  const token = Cookies.get("id_token");
 
-  useEffect(() => {   
+  useEffect(() => {
     if (token) {
       getUser(token);
     }
   }, [token]);
 
-  const getUser = async (access_token) => {
-    const data = await axios.get(
-      `${import.meta.env.VITE_OPENID_CONNECT_URL}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
-    setAuthData(data.data);
+  const getUser = async (token) => {
+    try {
+      const data = await axios.get(
+        `${import.meta.env.VITE_API_URL}/verify?token=${token}`
+      );
+      setAuthData(data.data);
+    } catch (error) {
+      alert(error)
+    }
   };
 
   const redirectLogin = () => {
@@ -37,10 +36,10 @@ const Home = () => {
 
     window.location.href = authorizationUrl;
   };
-  
+
   return (
     <div className="container">
-      {!useStore(state => state.authData) ? (
+      {!useStore((state) => state.authData) ? (
         <>
           <h1>Unauthorized</h1>
           <button onClick={redirectLogin} className="button">

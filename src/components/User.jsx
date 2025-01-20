@@ -7,9 +7,9 @@ const User = () => {
   
   return (
     <div className="container">
-      <h1>{authData.name}</h1>
-      <p>{authData.email}</p>
-      <img src={authData.picture} alt="profile" />
+      <h1>{authData.data.name}</h1>
+      <p>{authData.data.email}</p>
+      <img src={authData.data.image} alt="profile" />
 
       <div>
         <button
