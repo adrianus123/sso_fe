@@ -3,25 +3,42 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import User from "../components/User";
 import { useStore } from "../hooks/useStore";
+import { AuthURL } from "../hooks/scripts";
 
 const Home = () => {
-  const setAuthData = useStore((state) => state.setAuthData);
-  const token = Cookies.get("id_token");
+  const { authEndpoints, setAuthData, setToken, setAuthEndpoints } = useStore();
+  const id_token = Cookies.get("id_token");
 
   useEffect(() => {
-    if (token) {
-      getUser(token);
+    const fetchData = async () => {
+      const data = await AuthURL();
+      setAuthEndpoints(data);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (id_token) {
+      getUser(id_token);
     }
-  }, [token]);
+  }, [id_token]);
 
   const getUser = async (token) => {
     try {
-      const data = await axios.get(
+      const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/verify?token=${token}`
       );
-      setAuthData(data.data);
+
+      const data = response.data;
+      if (data.status == 200) {
+        setToken(token);
+        setAuthData(data);
+      } else {
+        throw new Error(data.message);
+      }
     } catch (error) {
-      alert(error)
+      alert(error);
     }
   };
 
@@ -30,16 +47,14 @@ const Home = () => {
     const response_type = "code";
     const scope = "openid email profile";
     const redirect_uri = `${import.meta.env.VITE_API_URL}/callback`;
-    const authorizationUrl = `${
-      import.meta.env.VITE_AUTHORIZATION_URL
-    }?client_id=${clientId}&response_type=${response_type}&scope=${scope}&redirect_uri=${redirect_uri}`;
+    const authorizationUrl = `${authEndpoints.authorization_endpoint}?client_id=${clientId}&response_type=${response_type}&scope=${scope}&redirect_uri=${redirect_uri}`;
 
     window.location.href = authorizationUrl;
   };
 
   return (
     <div className="container">
-      {!useStore((state) => state.authData) ? (
+      {!useStore((state) => state.token) ? (
         <>
           <h1>Welcome</h1>
           <button onClick={redirectLogin} className="button">

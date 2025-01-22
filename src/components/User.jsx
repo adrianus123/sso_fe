@@ -1,10 +1,31 @@
-// import { googleLogout } from "@react-oauth/google";
+import axios from "axios";
 import { useStore } from "../hooks/useStore";
 import Cookies from "js-cookie";
 
 const User = () => {
-  const { authData, setAuthData } = useStore();
-  
+  const { authData, setAuthData, token, setToken } = useStore();
+
+  const logout = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/logout`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      const data = response.data
+
+      if (data.status == 204) {
+        Cookies.remove("access_token");
+        Cookies.remove("id_token");
+        setAuthData(null);
+        setToken(null);
+        window.location.reload();
+      }
+    } catch (error) {
+      alert(error)
+    }
+  }
+
   return (
     <div className="container">
       <h1>{authData.data.name}</h1>
@@ -13,12 +34,7 @@ const User = () => {
 
       <div>
         <button
-          onClick={() => {
-            Cookies.remove("access_token");
-            Cookies.remove("id_token");
-            setAuthData(null)
-            window.location.reload();
-          }}
+          onClick={logout}
           className="button"
         >
           Logout
